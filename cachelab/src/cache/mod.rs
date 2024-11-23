@@ -1,4 +1,7 @@
-use crate::{parser::Transaction, types::Case};
+use crate::{
+    parser::Transaction,
+    types::{Case, Operation},
+};
 
 pub struct Cache {
     size: usize,
@@ -48,4 +51,18 @@ impl Cache {
     pub fn insert(&mut self, transaction: Transaction) {}
     pub fn print_summary(&self) {}
     pub fn print_verbose(&self) {}
+}
+
+impl Line {
+    pub fn init_from(&mut self, transaction: &Transaction) {
+        self.case = Case::CleanMiss;
+        self.is_valid = true;
+        self.is_dirty = match transaction.op {
+            Operation::Read => false,
+            Operation::Write => true,
+        };
+        self.tag = transaction.tag;
+        self.line_tag = 0; // TODO!: Should be -1 :(
+        self.last_used_by = self.i_op;
+    }
 }

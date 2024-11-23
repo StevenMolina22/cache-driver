@@ -1,7 +1,8 @@
 use std::{env, fs::File};
 
 use cache::Cache;
-use parser::get_transaction;
+use parser::LineIterator;
+use types::Sizes;
 
 mod args;
 mod cache;
@@ -18,9 +19,11 @@ fn main() {
 
     let mut cache = Cache::new(c, e, s);
 
-    while let Some(transaction) = get_transaction(&in_file) {
-        cache.insert(transaction);
-    }
+    let mut line_iter = LineIterator::new(in_file, Sizes::new(c, s, e));
 
+    while let Some(line) = line_iter.next() {
+        println!("{:?}", line);
+        cache.insert(line);
+    }
     cache.print_summary();
 }
