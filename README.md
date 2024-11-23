@@ -27,91 +27,7 @@ En este trabajo práctico se implementará un **simulador de caché parametrizad
     - [Detalle de casos](#detalle-de-casos)
     - [Ejemplo](#ejemplo)
 
-## Requisitos formales
-
-El comportamiento del programa se describe en detalle en la sección [Especificaciones](#especificaciones). En esta sección se listan primero los requisitos formales de la implementación y de la entrega.
-
-
-## Software
-
-Necesitan instalar lo siguiente para poder correr los tests
-
-```bash
-sudo apt install python-is-python3 python3-pip
-python3 -m pip install --user pytest pytest-testdox
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-Si les aparece un mensaje que dice:
-
-```This environment is externally managed```
-
-Vean el [apéndice](#apéndice) para más información.
-
-### Lenguaje
-
-La implementación del simulador debe realizarse en C (versión del estándar C11).
-Se pueden usar todas las funciones de la biblioteca estándar de C, incluyendo extensiones de GNU.
-
-Para los grupos que lo deseen pueden entregar una implementación en Rust, en cuyo caso se debe seguir la versión estable de Rust. No se permite el uso de ninguna dependencia adicional, más allá de la biblioteca estándar del lenguaje.
-
-### Makefile
-
-Deberá incluirse en la entrega un archivo _Makefile_ tal que, al correr en el directorio de la entrega la orden `make cachesim`, se compile dicho binario en el directorio.
-
-En particular, se debe cuidar:
-
-  - Se provee un archivo Makefile base, pero la idea sería que lo modifiquen a gusto, siempre cuidando de que la orden `make cachesim`, realice la compilación completa y genere el binario `cachesim`.
-
-  - Se espera, por supuesto, que no hagan todo en un único archivo, para mayor claridad y flexibilidad. Con lo cual van a tener que ir agregando las compilaciones de los archivos que vayan creando. Definan correctamente las dependencias.
-
-  - para enlazar con la biblioteca matemática, se puede usar: `LDLIBS := -lm`.
-
-Ejemplo:
-
-```make
-CC := gcc
-CFLAGS := -g -O2 -std=gnu11 -Wall -Wextra -Wpedantic
-LDLIBS := -lm
-
-TARGET := cachesim
-
-all: $(TARGET)
-
-cachesim: cachesim.o
-    $(CC) $(CFLAGS) $(LDLIBS) $^ -o $@
-
-%.o: %.c
-    $(CC) $(CFLAGS) $< -o $@
-
-.PHONY: clean all
-
-clean:
-    rm -rf *.o
-    rm -rf $(TARGET)
-```
-
-Por otra parte, y en el caso de una implementación en Rust, la compilación se debe realizar con _cargo_ y el Makefile puede ser, simplemente:
-
-```make
-cachesim:
-	cargo build --release
-	cp target/release/cachesim .
-
-# Nota: "cachesim" es phony solo para Rust.
-.PHONY: cachesim
-```
-
-
-### Entrega
-
-La entrega se realizará en el repositorio de Git proporcionado por la cátedra, **en el subdirectorio _cachelab_ de dicho repositorio.** En ese subdirectorio deberá hallarse todo el código del simulador. 
-
-**La entrega debe añadirse en una rama separada, por ejemplo _cachelab-dev_ o similar, para entonces crear un _pull request_ desde dicha rama hacia la rama _cachelab._. Sobre ese _pull request_ se realizará la corrección del trabajo. Los tests correrán automáticamente en github, lo cual comprueba el funcionamiento correcto del simulador.** 
-
-Para correr los tests localmente, es necesario tener instalado **pytest** y **pytest-testdox**. Para eso hacer:
-
+### Tests
 ```console
 pip install pytest pytest-testdox
 ```
@@ -158,7 +74,7 @@ Como dato interesante, los archivos de traza proporcionados corresponden a ejecu
 
 4.  Un número entero positivo (por ejemplo, 4 u 8) que indica la cantidad de bytes que la instrucción lee, o escribe.
 
-5.  El último valor en hexadecimal corresponde a los datos que se leyeron o escribieron. 
+5.  El último valor en hexadecimal corresponde a los datos que se leyeron o escribieron.
 
 El programa simulará estos accesos con una caché del tipo indicado, y reportará las estadísticas correspondientes. Los detalles de la simulación (cálculo de tiempos, etc.) se explican en la sección [Operación](#operación).
 
@@ -245,7 +161,7 @@ Si se especifica un rango _[n, m]_ para el que mostrar información detallada, p
 7.  **valid bit:** 1 o 0 según la línea de caché elegida tuviera previamente datos válidos, o no.
 8.  **dirty bit:** 0 o 1 según el bloque estuviera previamente sincronizado con memoria principal, o no.
 9.  **last used:** solo para cachés con asociatividad _E > 1_, el índice de la
-    operación que usó este bloque por última vez. 
+    operación que usó este bloque por última vez.
 
 
 ### Resumen y estadísticas
@@ -352,46 +268,3 @@ siguientes configuraciones:
 [adpcm.xex]: https://orgacomp.github.io/static/cachesim/trazas/adpcm.xex
 [adpcm_2048-2-64.txt]: https://orgacomp.github.io/static/cachesim/output/adpcm_2048-2-64.txt
 [adpcm_4096-1-256.txt]: https://orgacomp.github.io/static/cachesim/output/adpcm_4096-1-256.txt
-
-## Apéndice
-
-A continuación se listan dos soluciones posibles al problema de la instalación de paquetes en python, cuando se recibe el mensaje:
-
-```This environment is externally managed```
-
-### Primera alternativa
-
-La primera alternativa, que en realidad es la más sana, pero involucra un poco más de conocimientos de python, es usar un virtual environment. Esto es una forma estándar de instalar paquetes de python. Para eso es necesario instalar:
-```
-sudo apt install python3-venv
-```
-y luego crear un virtual environment donde se ubicarán los paquetes instalados. Por ejemplo `<ruta>` puede ser dentro del directorio de trabajo del taller (el taller ya ignorará el directorio `.venv` que vamos a crear):
-```
-cd <ruta>
-python3 -m venv .venv
-```
-Esto crea un directorio `.venv` ahi en `<ruta>` que es donde se instalarán los paquetes luego que activemos el environment. Para activar el environment, es necesario hacer:
-```
-source .venv/bin/activate
-```
-Y ahi ya podemos hacer pip install <paquete>
-Para desactivarlo:
-```
-deactivate
-```
-Tener en cuenta que el environment debe ser activado manualmente para cada sesión distinta de bash, o sea, si abren una nueva terminal, deben volver a activarlo. Esto es una ventaja, porque se pueden tener distintos environments para distintos proyectos, y no se mezclan los paquetes.
-
-### Segunda alternativa
-
-La segunda alternativa consiste en borrar un archivo que marca que pip no puede usarse en el sistema, porque supone que los paquetes se deben instalar con apt. Esto está bien, pero hay paquetes de python que no están en apt, con lo cual se pierde flexibilidad.
-Ese archivo en cuestión se encuentra en `/usr/lib/python3.<version>` donde `<version>` es la versión de python que tengan instalada, por ejemplo, si es el caso de 3.12:
-```
-cd /usr/lib/python3.12
-sudo rm EXTERNALLY-MANAGED
-```
-
-Para saber que python está usando tu sistema se puede hacer:
-```
-ls -al /usr/bin/python3
-```
-

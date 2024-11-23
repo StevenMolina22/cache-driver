@@ -4,14 +4,22 @@ LIBS:=-lm
 
 all: cachesim
 
-cachesim: cachesim.o
-	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
+run:
+	cargo run trazas/blowfish.xex 2048 4 8
 
-cachesim.o: cachesim.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+cachesim:
+	cargo build --release
+	cp target/release/cachesim .
 
-clean:
-	rm -f *.o
-	rm -f cachesim
-	
+cmp_summary:
+	diff 4096-4-16_summary.txt output/blowfish_4096-4-16_summary.txt
+	diff 2048-2-64_summary.txt output/adpcm_2048-2-64_summary.txt
+	diff 1024-4-32_summary.txt output/fft_1024-4-32_summary.txt
 
+cmp_txt:
+	diff 1024-4-32.txt output/fft_1024-4-32.txt
+	diff 2048-2-64.txt output/adpcm_2048-2-64.txt
+	diff 4096-1-256.txt output/blowfish_4096-1-256.txt
+
+# Nota: "cachesim" es phony solo para Rust.
+.PHONY: cachesim
