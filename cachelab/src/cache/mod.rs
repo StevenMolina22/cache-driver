@@ -1,24 +1,29 @@
-use crate::{
-    parser::Transaction,
-    types::{Case, Operation},
-};
+#![allow(dead_code)]
+use std::{fs::File, usize};
+pub mod funcs;
+pub mod io;
 
+use crate::types::{Case, Sizes};
+
+#[derive(Debug)]
 pub struct Cache {
     size: usize,
     asociativity: usize,
     sets: Vec<Set>,
     metrics: Metrics,
+    out_file: File,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct Set {
-    lines: Vec<Line>,
+    lines: Vec<Option<Line>>,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct Line {
     i_op: usize,
     case: Case,
+    i_set: usize,
     tag: usize,
     line_tag: usize,
     is_valid: bool,
@@ -26,7 +31,7 @@ pub struct Line {
     last_used_by: usize,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 struct Metrics {
     loads: usize,
     stores: usize,
@@ -40,29 +45,17 @@ struct Metrics {
 }
 
 impl Cache {
-    pub fn new(size: usize, asociativity: usize, sets: usize) -> Self {
+    pub fn new(sizes: Sizes, out_file: File) -> Self {
         Cache {
-            size,
-            asociativity,
-            sets: vec![Set::default(); sets],
+            size: sizes.size,
+            asociativity: sizes.asociativity,
+            sets: (0..sizes.sets)
+                .map(|_| Set {
+                    lines: vec![None; sizes.asociativity],
+                })
+                .collect(),
+            out_file,
             metrics: Metrics::default(),
         }
-    }
-    pub fn insert(&mut self, transaction: Transaction) {}
-    pub fn print_summary(&self) {}
-    pub fn print_verbose(&self) {}
-}
-
-impl Line {
-    pub fn init_from(&mut self, transaction: &Transaction) {
-        self.case = Case::CleanMiss;
-        self.is_valid = true;
-        self.is_dirty = match transaction.op {
-            Operation::Read => false,
-            Operation::Write => true,
-        };
-        self.tag = transaction.tag;
-        self.line_tag = 0; // TODO!: Should be -1 :(
-        self.last_used_by = self.i_op;
     }
 }

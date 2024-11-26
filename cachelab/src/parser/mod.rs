@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::types::{Operation, Sizes};
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
@@ -12,6 +13,7 @@ pub struct Transaction {
 
 pub struct LineIterator {
     reader: io::BufReader<File>,
+    idx: usize,
     sizes: Sizes,
 }
 
@@ -19,6 +21,7 @@ impl LineIterator {
     pub fn new(file: File, sizes: Sizes) -> Self {
         LineIterator {
             reader: BufReader::new(file),
+            idx: 0,
             sizes,
         }
     }
@@ -31,7 +34,11 @@ impl Iterator for LineIterator {
         let mut line = String::new();
         match self.reader.read_line(&mut line) {
             Ok(0) => None,
-            Ok(_) => Some(parse_line(&line, self.sizes)),
+            Ok(_) => {
+                let val = Some(parse_line(&line, self.sizes, self.idx));
+                self.idx += 1;
+                return val;
+            }
             Err(_) => None,
         }
     }
@@ -48,11 +55,10 @@ impl Iterator for LineIterator {
 ///     - [3] => Bytes read / written
 ///     - [4] => Data read / written
 ///
-pub fn parse_line(line: &str, sizes: Sizes) -> Transaction {
+pub fn parse_line(line: &str, sizes: Sizes, idx: usize) -> Transaction {
     let cols: Vec<&str> = line.split_whitespace().collect();
 
     // arguments that are parsed: [0] and [2]
-    let inst_addr = &cols[0][2..cols[0].len() - 1]; // from: "0x80540ed:"
     let mem_addr = usize::from_str_radix(&cols[2][2..], 16).unwrap();
 
     // lengths used for getting the tag and the set from mem address
@@ -60,7 +66,7 @@ pub fn parse_line(line: &str, sizes: Sizes) -> Transaction {
     let set_len = (sizes.sets).ilog2();
 
     Transaction {
-        i_op: usize::from_str_radix(inst_addr, 16).unwrap(),
+        i_op: idx,
         op: Operation::from_char(cols[1].chars().next().unwrap()),
         set: (mem_addr >> block_len) & ((1 << set_len) - 1),
         tag: (mem_addr) >> (block_len + set_len),

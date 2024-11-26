@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 #[derive(Default, Clone, Debug)]
 pub enum Operation {
     #[default]
