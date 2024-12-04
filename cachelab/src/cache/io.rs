@@ -6,7 +6,6 @@ use crate::{
 
 impl Line {
     pub fn from(transaction: &Transaction) -> Self {
-        println!("{}", transaction.i_op);
         Line {
             i_op: transaction.i_op,
             case: Case::CleanMiss,

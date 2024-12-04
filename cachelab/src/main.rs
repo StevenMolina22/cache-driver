@@ -17,7 +17,8 @@ mod parser;
 mod types;
 
 fn main() -> io::Result<()> {
-    let args: Vec<String> = env::args().collect();
+    // let args: Vec<String> = env::args().collect();
+    let args = vec!["", "trazas/blowfish.xex", "1024", "2", "32"];
     let in_file = File::open(&args[1])?;
     let out_file = OpenOptions::new()
         .write(true)
@@ -33,11 +34,16 @@ fn main() -> io::Result<()> {
     let mut cache = Cache::new(Sizes::new(c, s, e), out_file);
 
     let line_iter = LineIterator::new(in_file, Sizes::new(c, s, e));
+    let mut i = 0;
     for line in line_iter {
         cache.insert(&line)?;
+        if i > 10 {
+            break;
+        }
+        i += 1;
     }
 
-    println!("{:#?}", cache);
-    cache.print_summary();
+    // println!("{:#?}", cache);
+    // cache.print_summary();
     Ok(())
 }

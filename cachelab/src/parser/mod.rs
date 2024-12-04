@@ -32,12 +32,12 @@ impl Iterator for LineIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut line = String::new();
+        self.idx += 1;
         match self.reader.read_line(&mut line) {
             Ok(0) => None,
             Ok(_) => {
-                let val = Some(parse_line(&line, self.sizes, self.idx));
-                self.idx += 1;
-                return val;
+                let val = parse_line(&line, self.sizes, self.idx);
+                return Some(val);
             }
             Err(_) => None,
         }
