@@ -89,22 +89,16 @@ impl Cache {
 
         match line {
             Some(mut line) => {
-                println!(
-                    "Is valid: {}, Is dirty: {}, last_used_by: {}",
-                    is_valid, is_dirty, last_used_by
-                );
                 self.replace_line(tx, &mut line);
-                // Put the modified line back
                 self.sets[i_set].lines[i_lru] = Some(line);
             }
             None => {
                 self.sets[i_set].lines[i_lru] = Some(Line::from(tx));
             }
         }
-        let debug_str =
-            self.sets[i_set].lines[i_lru]
-                .unwrap()
-                .display(is_valid, is_dirty, last_used_by);
+        let mut line = self.sets[i_set].lines[i_lru].unwrap();
+        line.i_line = i_lru;
+        let debug_str = line.display(is_valid, is_dirty, last_used_by);
         self.out_file.write_all(debug_str.as_bytes())?;
         Ok(())
     }
