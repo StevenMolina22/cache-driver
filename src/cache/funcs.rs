@@ -45,9 +45,7 @@ impl Cache {
                         i_lru = Some(i);
                     }
                 }
-                None => {
-                    return i;
-                }
+                None => return i,
             }
         }
         i_lru.unwrap_or(0)

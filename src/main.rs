@@ -1,8 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_imports)]
 use std::{
-    env,
     fs::{File, OpenOptions},
     io,
 };
