@@ -1,12 +1,9 @@
-#![allow(dead_code)]
-use std::io::{self, Write};
-
+use super::{Cache, Line};
 use crate::{
     parser::Transaction,
     types::{Case, Operation},
 };
-
-use super::{Cache, Line};
+use std::io::{self, Write};
 
 impl Cache {
     fn handle_hit(&mut self, tx: &Transaction) -> bool {
@@ -70,7 +67,6 @@ impl Cache {
 
     pub fn insert(&mut self, tx: &Transaction) -> io::Result<()> {
         if self.handle_hit(tx) {
-            println!("There was a hit at: {}", tx.i_op);
             return Ok(());
         }
 
