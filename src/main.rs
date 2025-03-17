@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs::{File, OpenOptions},
     io,
 };
@@ -13,8 +14,8 @@ mod parser;
 mod types;
 
 fn main() -> io::Result<()> {
-    // let args: Vec<String> = env::args().collect();
-    let args = vec!["", "trazas/blowfish.xex", "1024", "2", "32"];
+    let args: Vec<String> = env::args().collect();
+    // let args = vec!["", "trazas/blowfish.xex", "1024", "2", "32"];
     let in_file = File::open(&args[1])?;
     let out_file = OpenOptions::new()
         .write(true)
@@ -32,7 +33,6 @@ fn main() -> io::Result<()> {
     let line_iter = LineIterator::new(in_file, Sizes::new(c, s, e));
 
     for line in line_iter.take(100) {
-        println!("Entering iteration of line: {}", line.i_op);
         cache.insert(&line)?;
         println!("{:?}", line);
     }
